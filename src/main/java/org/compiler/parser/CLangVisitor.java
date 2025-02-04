@@ -1,4 +1,4 @@
-// Generated from /home/morteza-mahdi-zadeh/Documents/compiler/src/main/java/org/compiler/org/compiler/CLang.g4 by ANTLR 4.13.2
+// Generated from /home/morteza-mahdi-zadeh/Documents/compiler/src/main/java/org/compiler/antlr/CLang.g4 by ANTLR 4.13.2
 package org.compiler.parser;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
@@ -65,6 +65,54 @@ public interface CLangVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitReturnStatement(CLangParser.ReturnStatementContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link CLangParser#printfStatement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPrintfStatement(CLangParser.PrintfStatementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link CLangParser#printfExpression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPrintfExpression(CLangParser.PrintfExpressionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link CLangParser#ifStatement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIfStatement(CLangParser.IfStatementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link CLangParser#whileStatement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitWhileStatement(CLangParser.WhileStatementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link CLangParser#forStatement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitForStatement(CLangParser.ForStatementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link CLangParser#forInit}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitForInit(CLangParser.ForInitContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link CLangParser#forUpdate}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitForUpdate(CLangParser.ForUpdateContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link CLangParser#comparisonExpression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitComparisonExpression(CLangParser.ComparisonExpressionContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link CLangParser#expression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -82,6 +130,12 @@ public interface CLangVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitTypeSpecifier(CLangParser.TypeSpecifierContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link CLangParser#comparisonOperator}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitComparisonOperator(CLangParser.ComparisonOperatorContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link CLangParser#operator}.
 	 * @param ctx the parse tree

@@ -1,4 +1,4 @@
-// Generated from /home/morteza-mahdi-zadeh/Documents/compiler/src/main/java/org/compiler/org/compiler/CLang.g4 by ANTLR 4.13.2
+// Generated from /home/morteza-mahdi-zadeh/Documents/compiler/src/main/java/org/compiler/antlr/CLang.g4 by ANTLR 4.13.2
 package org.compiler.parser;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
@@ -98,6 +98,86 @@ public interface CLangListener extends ParseTreeListener {
 	 */
 	void exitReturnStatement(CLangParser.ReturnStatementContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link CLangParser#printfStatement}.
+	 * @param ctx the parse tree
+	 */
+	void enterPrintfStatement(CLangParser.PrintfStatementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CLangParser#printfStatement}.
+	 * @param ctx the parse tree
+	 */
+	void exitPrintfStatement(CLangParser.PrintfStatementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CLangParser#printfExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterPrintfExpression(CLangParser.PrintfExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CLangParser#printfExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitPrintfExpression(CLangParser.PrintfExpressionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CLangParser#ifStatement}.
+	 * @param ctx the parse tree
+	 */
+	void enterIfStatement(CLangParser.IfStatementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CLangParser#ifStatement}.
+	 * @param ctx the parse tree
+	 */
+	void exitIfStatement(CLangParser.IfStatementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CLangParser#whileStatement}.
+	 * @param ctx the parse tree
+	 */
+	void enterWhileStatement(CLangParser.WhileStatementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CLangParser#whileStatement}.
+	 * @param ctx the parse tree
+	 */
+	void exitWhileStatement(CLangParser.WhileStatementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CLangParser#forStatement}.
+	 * @param ctx the parse tree
+	 */
+	void enterForStatement(CLangParser.ForStatementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CLangParser#forStatement}.
+	 * @param ctx the parse tree
+	 */
+	void exitForStatement(CLangParser.ForStatementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CLangParser#forInit}.
+	 * @param ctx the parse tree
+	 */
+	void enterForInit(CLangParser.ForInitContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CLangParser#forInit}.
+	 * @param ctx the parse tree
+	 */
+	void exitForInit(CLangParser.ForInitContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CLangParser#forUpdate}.
+	 * @param ctx the parse tree
+	 */
+	void enterForUpdate(CLangParser.ForUpdateContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CLangParser#forUpdate}.
+	 * @param ctx the parse tree
+	 */
+	void exitForUpdate(CLangParser.ForUpdateContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CLangParser#comparisonExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterComparisonExpression(CLangParser.ComparisonExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CLangParser#comparisonExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitComparisonExpression(CLangParser.ComparisonExpressionContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link CLangParser#expression}.
 	 * @param ctx the parse tree
 	 */
@@ -127,6 +207,16 @@ public interface CLangListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitTypeSpecifier(CLangParser.TypeSpecifierContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CLangParser#comparisonOperator}.
+	 * @param ctx the parse tree
+	 */
+	void enterComparisonOperator(CLangParser.ComparisonOperatorContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CLangParser#comparisonOperator}.
+	 * @param ctx the parse tree
+	 */
+	void exitComparisonOperator(CLangParser.ComparisonOperatorContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link CLangParser#operator}.
 	 * @param ctx the parse tree
