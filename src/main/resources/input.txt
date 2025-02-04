@@ -1,0 +1,7 @@
+void add(int a, int b) {
+    int result = a + b + c;
+}
+
+float multiply(float x, float y) {
+    return x / y / z;
+}
