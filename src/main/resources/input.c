@@ -1,8 +1,28 @@
 int main() {
-    float x = 11.4565543634346457567567;
+    int x = 10;
 
-    for (int i = 0 ; i < x ; i++) {
-        printf("true");
+    int y = 1.3434;
+    float y = 1;
+
+    for (int i = 0; i< 11.4; i++) {
+        printf("for loop");
     }
-    return 0;
+
+    int z = 4;
+    while (z <= 8.33) {
+        printf("while loop");
+    }
+
+    if (z < "dafasdf") {
+        printf("if stmt");
+    }
+    else {
+        printf("else stmt");
+    }
+
+    if (z < 10.00){
+        printf("dsfa");
+    }
+
+    return i;
 }

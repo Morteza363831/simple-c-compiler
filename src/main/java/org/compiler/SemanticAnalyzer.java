@@ -13,15 +13,119 @@ public class SemanticAnalyzer extends CLangBaseListener {
     private final Stack<Map<String, String>> symbolTableStack = new Stack<>();
 
     @Override
+    public void enterFunctionDeclaration(CLangParser.FunctionDeclarationContext ctx) {
+        String functionName = ctx.IDENTIFIER().getText();
+        String functionReturnType = ctx.typeSpecifier().getText();
+
+        if (symbolTableStack.isEmpty()) {
+            symbolTableStack.push(new HashMap<>());
+        } else {
+            // Check if the function is already declared
+            if (symbolTableStack.peek().containsKey(functionName)) {
+                System.err.println("Error: Function '" + functionName + "' already declared.");
+            }
+        }
+
+        symbolTableStack.peek().put(functionName, functionReturnType);
+    }
+
+    @Override
+    public void exitFunctionDeclaration(CLangParser.FunctionDeclarationContext ctx) {
+        String functionName = ctx.IDENTIFIER().getText();
+        String functionReturnType = ctx.typeSpecifier().getText();
+        boolean hasMatchingReturnType = false;
+
+        for (CLangParser.StatementContext statementCtx : ctx.block().statement()) {
+            if (statementCtx.returnStatement() != null) {
+                String returnType = evaluateExpression(statementCtx.returnStatement().expression());
+                if (!functionReturnType.equals(returnType)) {
+                    System.err.println("Error: Type mismatch in function '" + functionName + "'. Expected return type: " +
+                            functionReturnType + ", found: " + returnType);
+                } else {
+                    hasMatchingReturnType = true;
+                }
+            }
+        }
+
+        if (!functionReturnType.equals("void") && !hasMatchingReturnType) {
+            System.err.println("Error: Missing return statement with matching type in function '" + functionName + "'.");
+        }
+
+        // Pop the function-level symbol table after completing function validation
+        symbolTableStack.pop();
+    }
+
+    @Override
     public void enterBlock(CLangParser.BlockContext ctx) {
-        // Push a new scope when entering a block
-        symbolTableStack.push(new HashMap<>());
+        // Use the same function scope if inside a function, but add a map only for nested block scoping
+        //symbolTableStack.push(new HashMap<>());
     }
 
     @Override
     public void exitBlock(CLangParser.BlockContext ctx) {
-        // Pop the scope when exiting a block
-        symbolTableStack.pop();
+        //symbolTableStack.pop();
+    }
+
+
+
+    private void putFunction(String functionName, String functionReturnType, CLangParser.StatementContext x) {
+        if (functionReturnType.equals("void") && x.returnStatement() != null) {
+            System.err.println("Error: type mismatch in 'function'. function type : " + functionReturnType +  ", return type : void");
+        }
+        symbolTableStack.peek().put(functionName, functionReturnType);
+    }
+
+    @Override
+    public void enterIfStatement(CLangParser.IfStatementContext ctx) {
+        if (ctx.comparisonExpression() != null) {
+            String leftConditionType = evaluateExpression(ctx.comparisonExpression().expression(0));
+            String rightConditionType = evaluateExpression(ctx.comparisonExpression().expression(1));
+            if (!leftConditionType.equals(rightConditionType)) {
+                System.err.println("Error: Comparison expression types in 'if' does not match. left type : " + leftConditionType + ", right type : " + rightConditionType);
+            }
+        }
+    }
+
+    @Override
+    public void enterWhileStatement(CLangParser.WhileStatementContext ctx) {
+        if (ctx.comparisonExpression() != null) {
+            String leftConditionType = evaluateExpression(ctx.comparisonExpression().expression(0));
+            String rightConditionType = evaluateExpression(ctx.comparisonExpression().expression(1));
+            if (!leftConditionType.equals(rightConditionType)) {
+                System.err.println("Error: Comparison expression types in 'while' does not match. left type : " + leftConditionType + ", right type : " + rightConditionType);
+            }
+        }
+    }
+
+    @Override
+    public void enterForStatement(CLangParser.ForStatementContext ctx) {
+        // Validate the initialization statement
+        if (ctx.forInit() != null) {
+            putVariable(ctx.forInit().IDENTIFIER().getText(), ctx.forInit().typeSpecifier().getText(), false, ctx.forInit().expression());
+        }
+
+        // Validate the condition
+        if (ctx.comparisonExpression() != null) {
+            String leftConditionType = evaluateExpression(ctx.comparisonExpression().expression(0));
+            String rightConditionType = evaluateExpression(ctx.comparisonExpression().expression(1));
+            if (!leftConditionType.equals(rightConditionType)) {
+                System.err.println("Error: Comparison expression types in 'for' does not match. left type : " + leftConditionType + ", right type : " + rightConditionType);
+
+            }
+        }
+
+        // Validate the update expression
+        if (ctx.forUpdate() != null) {
+            String variable = ctx.forUpdate().IDENTIFIER().getText();
+            if (!isDeclared(variable)) {
+                System.err.println("Error: Variable '" + variable + "' not declared before update.");
+            }
+        }
+    }
+
+    @Override
+    public void exitForStatement(CLangParser.ForStatementContext ctx) {
+        symbolTableStack.peek().remove(ctx.forInit().IDENTIFIER().getText());
     }
 
     @Override
@@ -30,7 +134,6 @@ public class SemanticAnalyzer extends CLangBaseListener {
         String type = null;
         boolean flag = false;
 
-        // Handle variable declarations with optional type specifier
         if (ctx.typeSpecifier() != null) {
             type = ctx.typeSpecifier().getText();
             variable = ctx.IDENTIFIER().getText();
@@ -44,16 +147,18 @@ public class SemanticAnalyzer extends CLangBaseListener {
             }
         }
 
-        // Check for duplicate declarations in the current scope
+        putVariable(variable, type, flag, ctx.expression());
+    }
+
+    private void putVariable(String variable, String type, boolean flag, CLangParser.ExpressionContext expression) {
         if (symbolTableStack.peek().containsKey(variable) && !flag) {
             System.err.println("Error: Variable '" + variable + "' already declared in this scope.");
         } else {
             symbolTableStack.peek().put(variable, type);
         }
 
-        // Type check for assignments during declarations
-        if (ctx.expression() != null) {
-            String exprType = evaluateExpression(ctx.expression());
+        if (expression != null) {
+            String exprType = evaluateExpression(expression);
             flag = false;
             if (type.equals("float") && exprType.equals("int")) {
                 flag = true;
@@ -66,8 +171,30 @@ public class SemanticAnalyzer extends CLangBaseListener {
     }
 
     @Override
+    public void enterForInit(CLangParser.ForInitContext ctx) {
+        String variable;
+        String type = null;
+        boolean flag = false;
+
+        if (ctx.typeSpecifier() != null) {
+            type = ctx.typeSpecifier().getText();
+            variable = ctx.IDENTIFIER().getText();
+        } else {
+            variable = ctx.IDENTIFIER().getText();
+            type = lookupType(variable);
+            flag = true;
+            if (type == null) {
+                System.err.println("Error: Variable '" + variable + "' is not declared.");
+                return;
+            }
+        }
+        System.out.println(symbolTableStack.peek().get(variable));
+        putVariable(variable, type, flag, ctx.expression());
+    }
+
+
+    @Override
     public void enterExpressionStatement(CLangParser.ExpressionStatementContext ctx) {
-        // Handle standalone expressions such as assignments
         if (ctx.expression() != null) {
             evaluateExpression(ctx.expression());
         }
@@ -75,6 +202,9 @@ public class SemanticAnalyzer extends CLangBaseListener {
 
     private String evaluateExpression(CLangParser.ExpressionContext ctx) {
         if (ctx.primary().size() == 1) {
+            if (ctx.primary().get(0).IDENTIFIER() != null) {
+                return evaluatePrimary(ctx.primary().get(0));
+            }
             return evaluatePrimary(ctx.primary(0));
         } else {
             String leftType = evaluatePrimary(ctx.primary(0));
@@ -93,9 +223,8 @@ public class SemanticAnalyzer extends CLangBaseListener {
             return isDeclared(varName) ? lookupType(varName) : "error";
         } else if (ctx.CONSTANT() != null) {
             if (ctx.CONSTANT().getText().contains(".")) {
-
                 if (ctx.CONSTANT().getText().substring(ctx.CONSTANT().getText().lastIndexOf(".") + 1).length() > 8) {
-                    System.err.println("Error: Not a float number : " + ctx.CONSTANT().getText());
+                    System.err.println("Error: Not a float number: " + ctx.CONSTANT().getText());
                 }
                 return "float";
             }
@@ -120,7 +249,6 @@ public class SemanticAnalyzer extends CLangBaseListener {
     private String lookupType(String variable) {
         for (Map<String, String> scope : symbolTableStack) {
             if (scope.containsKey(variable)) {
-                //System.out.println("lookupType variable: " + variable + " type: " + scope.get(variable) );
                 return scope.get(variable);
             }
         }
