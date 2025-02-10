@@ -1,5 +1,5 @@
 
-package org.compiler;
+package org.compiler.tac;
 
 import org.compiler.parser.CLangBaseVisitor;
 import org.compiler.parser.CLangParser;
@@ -7,9 +7,9 @@ import org.compiler.parser.CLangParser;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TACGenerator extends CLangBaseVisitor<Void> { // or <String> if you want to return a value
+public class TacGenerator extends CLangBaseVisitor<Void> { // or <String> if you want to return a value
 
-    private List<TACInstruction> tacInstructions = new ArrayList<>();
+    private List<TacInstruction> tacInstructions = new ArrayList<>();
     private int tempVariableCounter = 0;
 
     // Helper method to generate unique temporary variable names
@@ -17,7 +17,7 @@ public class TACGenerator extends CLangBaseVisitor<Void> { // or <String> if you
         return "temp" + tempVariableCounter++;
     }
 
-    public List<TACInstruction> getTacInstructions() {
+    public List<TacInstruction> getTacInstructions() {
         return tacInstructions;
     }
 
@@ -31,7 +31,7 @@ public class TACGenerator extends CLangBaseVisitor<Void> { // or <String> if you
                 String op = ctx.operator(i).getText();
                 String right = visitPrimaryAndGetResult(ctx.primary(i + 1));
                 String temp = generateTempVariable();
-                tacInstructions.add(new TACInstruction(op, left, right, temp));
+                tacInstructions.add(new TacInstruction(op, left, right, temp));
                 left = temp;
             }
             return null;
@@ -55,7 +55,7 @@ public class TACGenerator extends CLangBaseVisitor<Void> { // or <String> if you
         String variableName = ctx.IDENTIFIER().getText();
         if (ctx.expression() != null) {
             String expressionResult = visitExpressionAndGetResult(ctx.expression());
-            tacInstructions.add(new TACInstruction("=", expressionResult, null, variableName));
+            tacInstructions.add(new TacInstruction("=", expressionResult, null, variableName));
         }
         return null;
     }
@@ -68,7 +68,7 @@ public class TACGenerator extends CLangBaseVisitor<Void> { // or <String> if you
                 String op = ctx.operator(i).getText();
                 String right = visitPrimaryAndGetResult(ctx.primary(i + 1));
                 String temp = generateTempVariable();
-                tacInstructions.add(new TACInstruction(op, left, right, temp));
+                tacInstructions.add(new TacInstruction(op, left, right, temp));
                 left = temp;
             }
             return left;
@@ -82,9 +82,9 @@ public class TACGenerator extends CLangBaseVisitor<Void> { // or <String> if you
     public Void visitReturnStatement(CLangParser.ReturnStatementContext ctx) {
         if (ctx.expression() != null) {
             String expressionResult = visitExpressionAndGetResult(ctx.expression());
-            tacInstructions.add(new TACInstruction("return", expressionResult, null, null));
+            tacInstructions.add(new TacInstruction("return", expressionResult, null, null));
         } else {
-            tacInstructions.add(new TACInstruction("return", null, null, null));
+            tacInstructions.add(new TacInstruction("return", null, null, null));
         }
         return null;
     }
@@ -96,19 +96,19 @@ public class TACGenerator extends CLangBaseVisitor<Void> { // or <String> if you
         String labelEnd = (ctx.statement(1) != null) ? generateLabel() : labelFalse; // Label after 'else' block, if present
 
         String conditionResult = visitComparisonExpressionAndGetResult(ctx.comparisonExpression());
-        tacInstructions.add(new TACInstruction("(ifTrueGoToThisLabel)", conditionResult, null, labelTrue));
-        tacInstructions.add(new TACInstruction("goto", null, null, labelFalse));
+        tacInstructions.add(new TacInstruction("(ifTrueGoToThisLabel)", conditionResult, null, labelTrue));
+        tacInstructions.add(new TacInstruction("goto", null, null, labelFalse));
 
-        tacInstructions.add(new TACInstruction("(ifTrueLabel):", labelTrue, null, null));
+        tacInstructions.add(new TacInstruction("(ifTrueLabel):", labelTrue, null, null));
         visit(ctx.statement(0)); // Visit 'then' block
 
         if (ctx.statement(1) != null) {
-            tacInstructions.add(new TACInstruction("goto", null, null, labelEnd)); // Jump over 'else' block
-            tacInstructions.add(new TACInstruction("(ifFalseLabel):", labelFalse, null, null));
+            tacInstructions.add(new TacInstruction("goto", null, null, labelEnd)); // Jump over 'else' block
+            tacInstructions.add(new TacInstruction("(ifFalseLabel):", labelFalse, null, null));
             visit(ctx.statement(1)); // Visit 'else' block
-            tacInstructions.add(new TACInstruction("(ifLoopEndsLabel):", labelEnd, null, null));
+            tacInstructions.add(new TacInstruction("(ifLoopEndsLabel):", labelEnd, null, null));
         } else {
-            tacInstructions.add(new TACInstruction("(ifFalseLabel):", labelFalse, null, null));
+            tacInstructions.add(new TacInstruction("(ifFalseLabel):", labelFalse, null, null));
         }
         return null;
     }
@@ -119,7 +119,7 @@ public class TACGenerator extends CLangBaseVisitor<Void> { // or <String> if you
         String right = visitExpressionAndGetResult(ctx.expression(1));
         String op = ctx.comparisonOperator().getText();
         String temp = generateTempVariable();
-        tacInstructions.add(new TACInstruction(op, left, right, temp));
+        tacInstructions.add(new TacInstruction(op, left, right, temp));
         return temp;
     }
 
@@ -134,17 +134,17 @@ public class TACGenerator extends CLangBaseVisitor<Void> { // or <String> if you
         String labelTrue = generateLabel();
         String labelFalse = generateLabel();
 
-        tacInstructions.add(new TACInstruction("(StartingLoopLabel):", labelStart, null, null));
+        tacInstructions.add(new TacInstruction("(StartingLoopLabel):", labelStart, null, null));
 
         String conditionResult = visitComparisonExpressionAndGetResult(ctx.comparisonExpression());
-        tacInstructions.add(new TACInstruction("(ifTrueGoToThisLabel)", conditionResult, null, labelTrue));
-        tacInstructions.add(new TACInstruction("goto", null, null, labelFalse));
+        tacInstructions.add(new TacInstruction("(ifTrueGoToThisLabel)", conditionResult, null, labelTrue));
+        tacInstructions.add(new TacInstruction("goto", null, null, labelFalse));
 
-        tacInstructions.add(new TACInstruction("(ifTrueLabel):", labelTrue, null, null));
+        tacInstructions.add(new TacInstruction("(ifTrueLabel):", labelTrue, null, null));
         visit(ctx.block()); // Visit loop body
-        tacInstructions.add(new TACInstruction("goto", null, null, labelStart)); // Jump back to the beginning
+        tacInstructions.add(new TacInstruction("goto", null, null, labelStart)); // Jump back to the beginning
 
-        tacInstructions.add(new TACInstruction("(ifFalseLabel):", labelFalse, null, null));
+        tacInstructions.add(new TacInstruction("(ifFalseLabel):", labelFalse, null, null));
         return null;
     }
 
@@ -157,28 +157,28 @@ public class TACGenerator extends CLangBaseVisitor<Void> { // or <String> if you
         // Initialize
         visit(ctx.forInit());
 
-        tacInstructions.add(new TACInstruction("(StartingLoopLabel):", labelStart, null, null));
+        tacInstructions.add(new TacInstruction("(StartingLoopLabel):", labelStart, null, null));
 
         // Condition
         if (ctx.comparisonExpression() != null) {
             String conditionResult = visitComparisonExpressionAndGetResult(ctx.comparisonExpression());
-            tacInstructions.add(new TACInstruction("(ifTrueGoToThisLabel)", conditionResult, null, labelTrue));
-            tacInstructions.add(new TACInstruction("goto", null, null, labelFalse));
+            tacInstructions.add(new TacInstruction("(ifTrueGoToThisLabel)", conditionResult, null, labelTrue));
+            tacInstructions.add(new TacInstruction("goto", null, null, labelFalse));
         } else {
             // No condition, always true
-            tacInstructions.add(new TACInstruction("goto", null, null, labelTrue));
+            tacInstructions.add(new TacInstruction("goto", null, null, labelTrue));
         }
 
-        tacInstructions.add(new TACInstruction("(ifTrueLabel):", labelTrue, null, null));
+        tacInstructions.add(new TacInstruction("(ifTrueLabel):", labelTrue, null, null));
         visit(ctx.block()); // Loop body
 
         // Update
         if (ctx.forUpdate() != null) {
             visit(ctx.forUpdate());
         }
-        tacInstructions.add(new TACInstruction("goto", null, null, labelStart));
+        tacInstructions.add(new TacInstruction("goto", null, null, labelStart));
 
-        tacInstructions.add(new TACInstruction("(ifFalseLabel):", labelFalse, null, null));
+        tacInstructions.add(new TacInstruction("(ifFalseLabel):", labelFalse, null, null));
         return null;
     }
 
@@ -186,7 +186,7 @@ public class TACGenerator extends CLangBaseVisitor<Void> { // or <String> if you
     public Void visitForInit(CLangParser.ForInitContext ctx) {
         String variableName = ctx.IDENTIFIER().getText();
         String expressionResult = visitExpressionAndGetResult(ctx.expression());
-        tacInstructions.add(new TACInstruction("=", expressionResult, null, variableName));
+        tacInstructions.add(new TacInstruction("=", expressionResult, null, variableName));
         return null;
     }
 
@@ -195,9 +195,9 @@ public class TACGenerator extends CLangBaseVisitor<Void> { // or <String> if you
         String variableName = ctx.IDENTIFIER().getText();
         String op = ctx.getChild(1).getText(); // Get "++" or "--"
         if (op.equals("++")) {
-            tacInstructions.add(new TACInstruction("+", variableName, "1", variableName));
+            tacInstructions.add(new TacInstruction("+", variableName, "1", variableName));
         } else if (op.equals("--")) {
-            tacInstructions.add(new TACInstruction("-", variableName, "1", variableName));
+            tacInstructions.add(new TacInstruction("-", variableName, "1", variableName));
         }
         return null;
     }

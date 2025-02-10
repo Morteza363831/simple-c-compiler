@@ -1,12 +1,12 @@
-package org.compiler;
+package org.compiler.tac;
 
-public class TACInstruction {
+public class TacInstruction {
     public String operator;  // e.g., "+", "-", "=", "if", "goto"
     public String arg1;      // Argument 1
     public String arg2;      // Argument 2
     public String result;    // Result variable (temporary or named)
 
-    public TACInstruction(String operator, String arg1, String arg2, String result) {
+    public TacInstruction(String operator, String arg1, String arg2, String result) {
         this.operator = operator;
         this.arg1 = arg1;
         this.arg2 = arg2;

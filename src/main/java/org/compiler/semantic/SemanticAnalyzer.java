@@ -1,4 +1,4 @@
-package org.compiler;
+package org.compiler.semantic;
 
 import org.compiler.parser.CLangBaseListener;
 import org.compiler.parser.CLangParser;
@@ -11,6 +11,7 @@ public class SemanticAnalyzer extends CLangBaseListener {
 
     // Symbol Table Stack for block scoping
     private final Stack<Map<String, String>> symbolTableStack = new Stack<>();
+    private boolean error = false;
 
     @Override
     public void enterFunctionDeclaration(CLangParser.FunctionDeclarationContext ctx) {
@@ -23,6 +24,7 @@ public class SemanticAnalyzer extends CLangBaseListener {
             // Check if the function is already declared
             if (symbolTableStack.peek().containsKey(functionName)) {
                 System.err.println("Error: Function '" + functionName + "' already declared.");
+                error = true;
             }
         }
 
@@ -41,6 +43,7 @@ public class SemanticAnalyzer extends CLangBaseListener {
                 if (!functionReturnType.equals(returnType)) {
                     System.err.println("Error: Type mismatch in function '" + functionName + "'. Expected return type: " +
                             functionReturnType + ", found: " + returnType);
+                    error = true;
                 } else {
                     hasMatchingReturnType = true;
                 }
@@ -49,6 +52,7 @@ public class SemanticAnalyzer extends CLangBaseListener {
 
         if (!functionReturnType.equals("void") && !hasMatchingReturnType) {
             System.err.println("Error: Missing return statement with matching type in function '" + functionName + "'.");
+            error = true;
         }
 
         // Pop the function-level symbol table after completing function validation
@@ -71,6 +75,7 @@ public class SemanticAnalyzer extends CLangBaseListener {
     private void putFunction(String functionName, String functionReturnType, CLangParser.StatementContext x) {
         if (functionReturnType.equals("void") && x.returnStatement() != null) {
             System.err.println("Error: type mismatch in 'function'. function type : " + functionReturnType +  ", return type : void");
+            error = true;
         }
         symbolTableStack.peek().put(functionName, functionReturnType);
     }
@@ -82,6 +87,7 @@ public class SemanticAnalyzer extends CLangBaseListener {
             String rightConditionType = evaluateExpression(ctx.comparisonExpression().expression(1));
             if (!leftConditionType.equals(rightConditionType)) {
                 System.err.println("Error: Comparison expression types in 'if' does not match. left type : " + leftConditionType + ", right type : " + rightConditionType);
+                error = true;
             }
         }
     }
@@ -93,6 +99,7 @@ public class SemanticAnalyzer extends CLangBaseListener {
             String rightConditionType = evaluateExpression(ctx.comparisonExpression().expression(1));
             if (!leftConditionType.equals(rightConditionType)) {
                 System.err.println("Error: Comparison expression types in 'while' does not match. left type : " + leftConditionType + ", right type : " + rightConditionType);
+                error = true;
             }
         }
     }
@@ -110,7 +117,7 @@ public class SemanticAnalyzer extends CLangBaseListener {
             String rightConditionType = evaluateExpression(ctx.comparisonExpression().expression(1));
             if (!leftConditionType.equals(rightConditionType)) {
                 System.err.println("Error: Comparison expression types in 'for' does not match. left type : " + leftConditionType + ", right type : " + rightConditionType);
-
+                error = true;
             }
         }
 
@@ -119,6 +126,7 @@ public class SemanticAnalyzer extends CLangBaseListener {
             String variable = ctx.forUpdate().IDENTIFIER().getText();
             if (!isDeclared(variable)) {
                 System.err.println("Error: Variable '" + variable + "' not declared before update.");
+                error = true;
             }
         }
     }
@@ -143,6 +151,7 @@ public class SemanticAnalyzer extends CLangBaseListener {
             flag = true;
             if (type == null) {
                 System.err.println("Error: Variable '" + variable + "' is not declared.");
+                error = true;
                 return;
             }
         }
@@ -153,6 +162,7 @@ public class SemanticAnalyzer extends CLangBaseListener {
     private void putVariable(String variable, String type, boolean flag, CLangParser.ExpressionContext expression) {
         if (symbolTableStack.peek().containsKey(variable) && !flag) {
             System.err.println("Error: Variable '" + variable + "' already declared in this scope.");
+            error = true;
         } else {
             symbolTableStack.peek().put(variable, type);
         }
@@ -166,6 +176,7 @@ public class SemanticAnalyzer extends CLangBaseListener {
             if (!type.equals(exprType) && !flag) {
                 System.err.println("Error: Type mismatch for variable '" + variable + "'. Expected: " + type +
                         ", Found: " + exprType);
+                error = true;
             }
         }
     }
@@ -185,11 +196,18 @@ public class SemanticAnalyzer extends CLangBaseListener {
             flag = true;
             if (type == null) {
                 System.err.println("Error: Variable '" + variable + "' is not declared.");
+                error = true;
                 return;
             }
         }
         System.out.println(symbolTableStack.peek().get(variable));
         putVariable(variable, type, flag, ctx.expression());
+    }
+
+    @Override
+    public void exitForInit(CLangParser.ForInitContext ctx) {
+        System.out.println(symbolTableStack.peek().get(ctx.IDENTIFIER().getText()));
+        symbolTableStack.peek().remove(ctx.IDENTIFIER().getText());
     }
 
 
@@ -212,6 +230,7 @@ public class SemanticAnalyzer extends CLangBaseListener {
 
             if (!leftType.equals(rightType)) {
                 System.err.println("Error: Type mismatch in expression. Found: " + leftType + " and " + rightType);
+                error = true;
             }
             return leftType;
         }
@@ -225,6 +244,7 @@ public class SemanticAnalyzer extends CLangBaseListener {
             if (ctx.CONSTANT().getText().contains(".")) {
                 if (ctx.CONSTANT().getText().substring(ctx.CONSTANT().getText().lastIndexOf(".") + 1).length() > 8) {
                     System.err.println("Error: Not a float number: " + ctx.CONSTANT().getText());
+                    error = true;
                 }
                 return "float";
             }
@@ -253,5 +273,9 @@ public class SemanticAnalyzer extends CLangBaseListener {
             }
         }
         return null;
+    }
+
+    public boolean hasError() {
+        return error;
     }
 }
