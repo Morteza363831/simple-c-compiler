@@ -181,7 +181,7 @@ public class SemanticAnalyzer extends CLangBaseListener {
         }
     }
 
-    @Override
+    /*@Override
     public void enterForInit(CLangParser.ForInitContext ctx) {
         String variable;
         String type = null;
@@ -202,11 +202,10 @@ public class SemanticAnalyzer extends CLangBaseListener {
         }
         System.out.println(symbolTableStack.peek().get(variable));
         putVariable(variable, type, flag, ctx.expression());
-    }
+    }*/
 
     @Override
     public void exitForInit(CLangParser.ForInitContext ctx) {
-        System.out.println(symbolTableStack.peek().get(ctx.IDENTIFIER().getText()));
         symbolTableStack.peek().remove(ctx.IDENTIFIER().getText());
     }
 

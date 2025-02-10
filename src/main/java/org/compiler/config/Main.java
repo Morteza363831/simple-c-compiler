@@ -42,7 +42,6 @@ public class Main {
             tacGenerator.visit(tree);  // Traverse the AST and generate TAC
         }
 
-        System.out.println(tokens.getTokens().size());
 
         String tacJson = objectMapper.writeValueAsString(tacGenerator.getTacInstructions());
         File tacFile = new File("src/main/resources/tac.json");
@@ -55,5 +54,8 @@ public class Main {
             writer.write(tacJson);
             writer.close();
         }
+
+
+        System.out.println("FINISHED");
     }
 }
